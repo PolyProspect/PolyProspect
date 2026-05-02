@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -542,18 +543,22 @@
     setStatus('AI is mapping your search and scraping leads... ~30 seconds', 'running');
 
     try {
-      await fetch(WEBHOOK_URL, {
+      const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        mode: 'no-cors',
         body: JSON.stringify({ query: bizType, city: cities.join(', '), quantity: qty })
       });
 
-      await new Promise(r => setTimeout(r, 32000));
+      const data = await response.json();
 
-      setStatus('Leads ready — click below to download', 'done');
-      const dlBtn = document.getElementById('dl-btn');
-      dlBtn.style.display = 'block';
+      if (data && data.sheet_url) {
+        setStatus('Leads ready — click below to download', 'done');
+        const dlBtn = document.getElementById('dl-btn');
+        dlBtn.style.display = 'block';
+        dlBtn.href = data.sheet_url;
+      } else {
+        setStatus('Something went wrong. Please try again.', 'error');
+      }
 
     } catch(e) {
       setStatus('Connection error. Please try again.', 'error');
